@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (Bash ${{ matrix.version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: current
+            minimum: false
+          - version: '4.3'
+            minimum: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Build Bash 4.3
+        if: matrix.minimum
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes build-essential
+          curl --fail --location --silent --show-error \
+            https://ftp.gnu.org/gnu/bash/bash-4.3.tar.gz \
+            --output "$RUNNER_TEMP/bash-4.3.tar.gz"
+          printf '%s  %s\n' \
+            afc687a28e0e24dc21b988fa159ff9dbcf6b7caa92ade8645cc6d5605cd024d4 \
+            "$RUNNER_TEMP/bash-4.3.tar.gz" |
+            sha256sum --check
+          tar -xzf "$RUNNER_TEMP/bash-4.3.tar.gz" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/bash-4.3"
+          ./configure --prefix="$RUNNER_TEMP/bash-4.3-install"
+          make --jobs=2
+          make install
+          echo "$RUNNER_TEMP/bash-4.3-install/bin" >> "$GITHUB_PATH"
+      - name: Verify shell and syntax
+        run: |
+          bash --version
+          bash -n install.sh terminal-icons.sh icon-theme-data.sh color-theme-data.sh \
+            tests/test_installer.sh tests/test_terminal_icons.sh
+      - name: Verify minimum Bash version
+        if: matrix.minimum
+        run: test "$(bash -c 'printf "%s.%s" "${BASH_VERSINFO[0]}" "${BASH_VERSINFO[1]}"')" = 4.3
+      - name: Run tests
+        run: |
+          bash tests/test_terminal_icons.sh
+          bash tests/test_installer.sh
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
+      - name: Lint Bash scripts
+        run: shellcheck --severity=warning -s bash install.sh terminal-icons.sh icon-theme-data.sh color-theme-data.sh tests/*.sh
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - tests
+      - shellcheck
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Validate semantic version tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            printf 'Expected a semantic version tag like v1.0.0; got %s\n' "$RELEASE_TAG" >&2
+            exit 1
+          fi
+      - name: Publish release with generated notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" --title "Terminal-Icons $RELEASE_TAG" --generate-notes
