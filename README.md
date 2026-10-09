@@ -1,36 +1,86 @@
 # Terminal-Icons for Linux
 
-A Bash equivalent of the [devblackops/terminal-icons](https://github.com/devblackops/terminal-icons)
-PowerShell module, Terminal-Icons for Linux displays file and folder icons
-using [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts). It installs its
-scripts and icon and color theme data in `~/terminal-icons/`, adds the loader
-to `~/.bashrc`, and provides the `ti` command for long listings (`-l`) and
-tree views (`--tree`), with color controls.
+[![CI](https://github.com/camilolsDev/Terminal-Icons-for-Linux/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/camilolsDev/Terminal-Icons-for-Linux/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Bash 4.3+](https://img.shields.io/badge/Bash-4.3%2B-blue.svg)](#requirements)
 
-## Installation
+**Colorful Nerd Font icons for files and folders, right in your Bash terminal.**
+
+Terminal-Icons is a Linux-friendly Bash counterpart to the
+[devblackops/Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
+PowerShell module. Browse files with icons, inspect detailed metadata, or
+navigate a directory tree with the simple `ti` command.
+
+## Preview
+
+`ti -l` displays permissions, owner, group, size, modified time, and an icon
+matched to each file name or extension:
+
+![Colored ti long listing showing icons for 20 sample files](./docs/images/ti-long-listing.png)
+
+The theme also includes **45 named folder icons**, plus generic-folder and
+directory-symlink icons:
+
+<details>
+<summary>View the complete folder icon gallery</summary>
+<br>
+<img src="./docs/images/folder-icons.png" alt="All 45 named Terminal-Icons folder mappings, plus generic and symlink icons" width="760">
+</details>
+
+The [demo files and screenshot guide](./examples/README.md) include the sample
+files and both previews. Recreate the file listing locally with
+`ti -l examples/demo-files`, or run `bash examples/show-folder-icons.sh` from
+the repository root to see the folder icons in your terminal.
+
+## Features
+
+- File and folder icons powered by Nerd Fonts
+- Detailed listings with permissions, owner, group, size, and modification time
+- Recursive tree view, including hidden entries, without following symlinks
+- True-color theme based on the upstream devblackops mappings
+- Automatic color in interactive terminals; supports `NO_COLOR`, `--color`,
+  and `--no-color`
+- Bash completion for options and file paths
+- Safe, repeatable installation and uninstall
+
+## Requirements
+
+- Bash 4.3 or newer
+- GNU coreutils: `stat`, `date`, and `numfmt`
+- A [Nerd Font](https://github.com/ryanoasis/nerd-fonts) and a terminal that
+  supports it (for example, Kitty, Alacritty, foot, or GNOME Terminal with a
+  Nerd Font configured)
+
+## Install
+
+### From a local checkout
 
 ```bash
-# From the project directory:
+git clone https://github.com/camilolsDev/Terminal-Icons-for-Linux.git
+cd Terminal-Icons-for-Linux
 bash install.sh
-# Run it again at any time to update the installed files.
-
-# Load it in the current terminal (new Bash terminals load it automatically):
-source ~/terminal-icons/terminal-icons.sh
-
-# Remove Terminal-Icons and its Bash startup entry:
-bash install.sh --uninstall
 ```
 
-Terminal-Icons currently supports Bash. The installer copies the script and
-the complete icon and color theme data to `~/terminal-icons/`, then adds it
-to `~/.bashrc`. This startup file is read by interactive Bash shells; users
-whose terminal starts a login Bash that does not read `~/.bashrc` can add
-`source "$HOME/terminal-icons/terminal-icons.sh"` to the startup file used by
-their terminal.
+The installer copies the scripts, theme data, and license files into
+`~/terminal-icons/`, then adds the loader to `~/.bashrc`. Re-run the installer
+after updating the checkout to refresh the installed files. No `sudo` access
+is needed.
+
+To load it in the current terminal immediately:
+
+```bash
+source ~/terminal-icons/terminal-icons.sh
+```
+
+Interactive Bash shells read `~/.bashrc`. If your terminal starts a login
+Bash that does not read it, add the `source` command above to the startup file
+used by that terminal.
 
 ### Install a specific release
 
-Replace `vX.Y.Z` with the version you want from the project's GitHub Releases:
+Choose a version from the project's
+[GitHub Releases](https://github.com/camilolsDev/Terminal-Icons-for-Linux/releases)
+and replace `vX.Y.Z` below with its tag:
 
 ```bash
 git clone --depth 1 --branch vX.Y.Z \
@@ -39,7 +89,7 @@ cd Terminal-Icons-for-Linux
 bash install.sh
 ```
 
-To update this clone to a newer release and install it, run:
+To update this checkout to a newer release:
 
 ```bash
 git fetch --depth 1 origin tag vX.Y.Z
@@ -47,100 +97,70 @@ git checkout --detach vX.Y.Z
 bash install.sh
 ```
 
-To uninstall, run `bash install.sh --uninstall` from any clone of the project.
-
-## Usage
+To uninstall Terminal-Icons and remove its Bash startup entry, run from a
+project checkout:
 
 ```bash
-# Show icons for current directory
-ti
-
-# Show icons for a specific path
-ti /home/user/docs
-
-# Show permissions, owner, group, size, and modified time
-ti --long
-ti -l /home/user/docs
-
-# Show exact sizes in bytes
-ti --bytes /home/user/docs
-
-# Show a recursive directory tree
-ti --tree
-ti --tree /home/user/docs
-
-# Control color output (automatic by default in interactive terminals)
-ti --color
-ti --no-color
+bash install.sh --uninstall
 ```
 
-By default, colors are enabled only for interactive terminals. Set `NO_COLOR=1`
-to disable automatic colors; `--color` explicitly forces color, while
-`--no-color` disables it for that invocation. Long listings use human-readable
-binary units (for example, `2.0KiB`); `--bytes` shows exact byte counts.
+## Use `ti`
 
-## Optional `ls` and `ll` aliases
+```bash
+ti                         # List the current directory
+ti /home/user/docs         # List a specific path
+ti -l                      # Detailed listing
+ti --bytes                 # Detailed listing with exact byte sizes
+ti --tree                  # Recursive tree
+ti --color                 # Force color
+ti --no-color              # Disable color
+```
 
-`ti` does not replace `ls` automatically. To make `ls` show icons and `ll`
-show the detailed listing, add these aliases to `~/.bashrc` after the
-Terminal-Icons `source` line:
+Colors are automatic in interactive terminals and disabled when output is
+piped. Set `NO_COLOR=1` to disable automatic colors. `--color` explicitly
+forces color, while `--no-color` disables it for that invocation. Long
+listings use human-readable binary units (such as `2.0KiB`); `--bytes` shows
+exact byte counts.
+
+### Optional `ls` and `ll` aliases
+
+`ti` does not replace `ls` automatically. To add optional aliases, put these
+lines in `~/.bashrc` after the Terminal-Icons loader:
 
 ```bash
 alias ls='ti --color'
 alias ll='ti --color -l'
 ```
 
-Apply the changes to the current terminal with:
-
-```bash
-source ~/.bashrc
-```
-
-These aliases force the Terminal-Icons theme colors and route commands to
-`ti`; they do not preserve all GNU `ls` options. `ll` runs the colored `ti -l`
-format. To restore the normal `ls` command for the current terminal, run
+Apply the change in the current terminal with `source ~/.bashrc`. These
+aliases route commands to `ti` and do not preserve all GNU `ls` options.
+Restore the normal `ls` command for the current terminal with
 `unalias ls ll`.
 
-## Requirements
+## Development
 
-- Bash 4.3 or newer
-- GNU coreutils (`stat`, `date`, and `numfmt`)
-- [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) installed
-- Terminal supporting Nerd Fonts (Alacritty, Kitty, foot, GNOME Terminal with patched font, etc.)
-
-## Features
-
-- **File type icons** - Maps common extensions to Nerd Font glyphs
-- **Folder mappings** - Special folders, including `.git`, `.config`, `.cache`, and `node_modules`
-- **Color coding** - Uses the upstream devblackops RGB color theme in terminals with true-color support
-- **Bash configuration files** - `.bashrc` uses the same shell icon and color as `.sh` files
-- **`ti` command** - Show icons for any path
-- **Detailed listing** - `ti -l` displays permissions, owner, group, human-readable size, and modified time
-- **Tree view** - `ti --tree` recursively lists directories, including hidden entries, without following symlinks
-- **Color controls** - Honors `NO_COLOR`, supports `--color` and `--no-color`, and avoids color by default when output is piped
-- **Bash completion** - Completes options and filesystem paths
-- **Safe lifecycle** - Re-running `bash install.sh` updates the installation without duplicating the Bash startup line; `bash install.sh --uninstall` removes only Terminal-Icons files and its own startup line
-- **Complete devblackops theme** - Includes all file-name, extension, and folder mappings from the upstream theme
-
-The icon mappings are adapted from the MIT-licensed
-[devblackops/Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
-project and use Nerd Fonts glyphs. Icon and color mappings and their license
-attributions are included in [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md).
-Linux does not have Windows junctions, so the upstream junction-specific rules
-are not applicable.
-
-## Development and releases
-
-Run the test suite locally with:
+Run the checks locally:
 
 ```bash
 bash -n install.sh terminal-icons.sh icon-theme-data.sh color-theme-data.sh \
   tests/test_installer.sh tests/test_terminal_icons.sh
 bash tests/test_terminal_icons.sh
 bash tests/test_installer.sh
+shellcheck -s bash install.sh terminal-icons.sh icon-theme-data.sh \
+  color-theme-data.sh tests/*.sh
 ```
 
-GitHub Actions runs these checks, ShellCheck, and tests with both the minimum
-supported Bash 4.3 and the runner's current Bash. Pushing a semantic-version
-tag such as `v1.0.0` runs the checks and then publishes a GitHub Release with
-generated release notes.
+GitHub Actions runs the tests with Bash 4.3 and the runner's current Bash, and
+checks the scripts with ShellCheck. Pushing a semantic-version tag such as
+`v1.0.0` runs CI and publishes a GitHub Release with generated release notes.
+
+## Credits and license
+
+The icon and color mappings are adapted from the MIT-licensed
+[devblackops/Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
+project and [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts). See
+[THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md) for attributions. Linux
+does not have Windows junctions, so the upstream junction-specific rules do
+not apply.
+
+Terminal-Icons for Linux is released under the [MIT License](./LICENSE).
