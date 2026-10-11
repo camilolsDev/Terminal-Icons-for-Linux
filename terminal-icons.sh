@@ -227,7 +227,7 @@ format_long_path() {
         printf "Error: could not format modification time for '%s'\n" "$path" >&2
         return 1
     fi
-    printf "  %-10s %-10s %-10s %10s %-32s " "$permissions" "$owner" "$group" "$formatted_size" "$modified"
+    printf "  %-10s %-5s %-5s %10s %-25s " "$permissions" "$owner" "$group" "$formatted_size" "$modified"
     format_path "$path"
     printf '\n'
 }
@@ -362,9 +362,9 @@ ti() {
 
         if [[ "$long_format" == true && ${#children[@]} -gt 0 ]]; then
             if [[ "$show_bytes" == true ]]; then
-                printf '  %-10s %-10s %-10s %10s %-32s %s\n' "Permissions" "Owner" "Group" "Bytes" "Modified" "Name"
+                printf '  %-10s %-5s %-5s %10s %-25s %s\n' "Permissions" "Owner" "Group" "Bytes" "Modified" "Name"
             else
-                printf '  %-10s %-10s %-10s %10s %-32s %s\n' "Permissions" "Owner" "Group" "Size" "Modified" "Name"
+                printf '  %-10s %-5s %-5s %10s %-25s %s\n' "Permissions" "Owner" "Group" "Size" "Modified" "Name"
             fi
         fi
 

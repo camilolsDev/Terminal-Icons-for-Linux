@@ -102,6 +102,14 @@ fi
 
 long_output="$(ti --no-color -l "$TEST_DIR/2 KiB.bin")"
 assert_contains "$long_output" '2.0KiB' 'long listing uses human-readable sizes'
+IFS=$'\t' read -r file_owner file_group <<< "$(stat --printf='%U\t%G' -- "$TEST_DIR/2 KiB.bin")"
+owner_group_columns="$(printf '%-5s %-5s' "$file_owner" "$file_group")"
+assert_contains "$long_output" "$owner_group_columns" 'long listing keeps owner and group columns close together'
+modified_time="$(stat --printf='%Y' -- "$TEST_DIR/2 KiB.bin")"
+formatted_modified="$(date -d "@$modified_time" '+%Y-%m-%d %H:%M:%S %z')"
+file_icon="$(get_icon "$TEST_DIR/2 KiB.bin")"
+modified_name_columns="$formatted_modified $file_icon  2 KiB.bin"
+assert_contains "$long_output" "$modified_name_columns" 'long listing keeps modified time and name columns close together'
 byte_output="$(ti --no-color --bytes "$TEST_DIR/2 KiB.bin")"
 assert_contains "$byte_output" '2048' '--bytes displays exact size and implies long mode'
 if ti --no-color --unknown-option >/dev/null 2>&1; then

@@ -62,14 +62,16 @@ bash install.sh
 ```
 
 The installer copies the scripts, theme data, and license files into
-`~/terminal-icons/`, then adds the loader to `~/.bashrc`. Re-run the installer
-after updating the checkout to refresh the installed files. No `sudo` access
-is needed.
+`$XDG_DATA_HOME/terminal-icons/`, or `~/.local/share/terminal-icons/` when
+`XDG_DATA_HOME` is not set. It then adds the loader to `~/.bashrc`. These paths
+are resolved for the user running the installer; no `sudo` access is needed.
+Keep the same `XDG_DATA_HOME` value when uninstalling. Re-run the installer
+after updating the checkout to refresh the installed files.
 
 To load it in the current terminal immediately:
 
 ```bash
-source ~/terminal-icons/terminal-icons.sh
+source "${XDG_DATA_HOME:-$HOME/.local/share}/terminal-icons/terminal-icons.sh"
 ```
 
 Interactive Bash shells read `~/.bashrc`. If your terminal starts a login

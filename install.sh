@@ -8,11 +8,24 @@ set -e
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-SHELL_RC="$HOME/.bashrc"
-INSTALL_DIR="$HOME/terminal-icons"
-
 usage() {
     printf 'Usage: bash install.sh [--uninstall]\n'
+}
+
+configure_paths() {
+    if [[ -z "${HOME:-}" || "$HOME" != /* ]]; then
+        printf 'Error: HOME must be set to an absolute path.\n' >&2
+        return 1
+    fi
+
+    local data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+    if [[ "$data_home" != /* ]]; then
+        printf 'Error: XDG_DATA_HOME must be an absolute path.\n' >&2
+        return 1
+    fi
+
+    SHELL_RC="$HOME/.bashrc"
+    INSTALL_DIR="$data_home/terminal-icons"
 }
 
 uninstall() {
@@ -58,6 +71,7 @@ uninstall() {
 case "${1:-}" in
     --uninstall)
         (( $# == 1 )) || { usage >&2; exit 2; }
+        configure_paths
         uninstall
         exit
         ;;
@@ -72,6 +86,8 @@ case "${1:-}" in
         exit 2
         ;;
 esac
+
+configure_paths
 
 echo "========================================="
 echo "Terminal-Icons for Linux Installer"
