@@ -40,7 +40,7 @@ jobs:
             sha256sum --check
           tar -xzf "$RUNNER_TEMP/bash-4.3.tar.gz" -C "$RUNNER_TEMP"
           cd "$RUNNER_TEMP/bash-4.3"
-          ./configure CFLAGS=-std=gnu17 --prefix="$RUNNER_TEMP/bash-4.3-install"
+          ./configure CFLAGS=-std=gnu89 --prefix="$RUNNER_TEMP/bash-4.3-install"
           make --jobs=2
           make install
           echo "$RUNNER_TEMP/bash-4.3-install/bin" >> "$GITHUB_PATH"
